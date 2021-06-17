@@ -1,5 +1,5 @@
 import React from 'react';
 
 export const Feed = () => {
-  return <div></div>;
+  return <div>Feed</div>;
 };
