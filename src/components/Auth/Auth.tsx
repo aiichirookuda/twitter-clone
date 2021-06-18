@@ -63,7 +63,7 @@ export const Auth: React.FC = () => {
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [userName, setUserName] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
   const [avatarImage, setAvatarImage] = useState<File | null>(null);
   const [isLogin, setIsLogin] = useState<boolean>(true);
 
@@ -94,12 +94,12 @@ export const Auth: React.FC = () => {
       url = await storage.ref('avatars').child(fileName).getDownloadURL();
     }
     await authUser.user?.updateProfile({
-      displayName: userName,
+      displayName: username,
       photoURL: url,
     });
     dispatch(
       updateUserProfile({
-        displayName: userName,
+        displayName: username,
         photoUrl: url,
       })
     );
@@ -122,6 +122,45 @@ export const Auth: React.FC = () => {
             {isLogin ? 'Login' : 'Register'}
           </Typography>
           <form className={classes.form} noValidate>
+            {!isLogin && (
+              <>
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="username"
+                  label="Username"
+                  name="username"
+                  autoComplete="username"
+                  autoFocus
+                  value={username}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setUsername(e.target.value)
+                  }
+                />
+                <Box textAlign="center">
+                  <IconButton>
+                    <label>
+                      <AccountCircleIcon
+                        fontSize="large"
+                        className={
+                          avatarImage
+                            ? Styles.login_addIconLoaded
+                            : Styles.login_addIcon
+                        }
+                      />
+                      <input
+                        className={Styles.login_hiddenIcon}
+                        type="file"
+                        onChange={onChangeImageHandler}
+                      />
+                    </label>
+                  </IconButton>
+                </Box>
+              </>
+            )}
+
             <TextField
               variant="outlined"
               margin="normal"
@@ -153,6 +192,11 @@ export const Auth: React.FC = () => {
               }
             />
             <Button
+              disabled={
+                isLogin
+                  ? !email || password.length < 6
+                  : !username || password.length < 6 || !avatarImage
+              }
               fullWidth
               variant="contained"
               color="primary"
