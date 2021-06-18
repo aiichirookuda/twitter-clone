@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppDispatch } from '../../app/hooks';
 import { auth, provider, storage } from '../../firebase';
+import { updateUserProfile } from '../../features/userSlice';
 import Styles from './Auth.module.scss';
 
 import {
@@ -57,18 +58,51 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const Auth = () => {
+export const Auth: React.FC = () => {
   const classes = useStyles();
+  const dispatch = useAppDispatch();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
+  const [avatarImage, setAvatarImage] = useState<File | null>(null);
   const [isLogin, setIsLogin] = useState<boolean>(true);
+
+  const onChangeImageHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files![0]) {
+      setAvatarImage(e.target.files![0]);
+      e.target.value = '';
+    }
+  };
 
   const signInEmail = async () => {
     await auth.signInWithEmailAndPassword(email, password);
   };
 
   const signUpEmail = async () => {
-    await auth.createUserWithEmailAndPassword(email, password);
+    const authUser = await auth.createUserWithEmailAndPassword(email, password);
+    let url = '';
+    if (avatarImage) {
+      const S =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      const N = 16;
+      const randomChar = Array.from(crypto.getRandomValues(new Uint32Array(N)))
+        .map((n) => S[n % S.length])
+        .join('');
+      const fileName = randomChar + '_' + avatarImage.name;
+
+      await storage.ref(`avatars/${fileName}`).put(avatarImage);
+      url = await storage.ref('avatars').child(fileName).getDownloadURL();
+    }
+    await authUser.user?.updateProfile({
+      displayName: userName,
+      photoURL: url,
+    });
+    dispatch(
+      updateUserProfile({
+        displayName: userName,
+        photoUrl: url,
+      })
+    );
   };
 
   const signInGoogle = async () => {
