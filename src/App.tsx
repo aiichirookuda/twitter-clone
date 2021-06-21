@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Styles from './App.module.scss';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { Auth } from './components/Auth/Auth';
-import { Feed } from './components/Feed';
+import { Feed } from './components/Feed/Feed';
 import { selectUser, login, logout } from './features/userSlice';
 import { auth } from './firebase';
 
