@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Styles from './Post.module.scss';
 import { db } from '../../firebase';
 import firebase from 'firebase/app';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../app/hooks';
 import { selectUser } from '../../features/userSlice';
 import { Avatar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -26,6 +26,19 @@ export const Post: React.FC<PROPS> = ({
   timestamp,
   username,
 }) => {
+  const user = useAppSelector(selectUser);
+  const [comment, setComment] = useState('');
+  const newComment = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    db.collection('posts').doc(postId).collection('comments').add({
+      avatar: user.photoUrl,
+      text: comment,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      username: user.displayName,
+    });
+    setComment('');
+  };
+
   return (
     <div className={Styles.post}>
       <div className={Styles.post_avatar}>
@@ -50,6 +63,28 @@ export const Post: React.FC<PROPS> = ({
             <img src={image} alt="tweet" />
           </div>
         )}
+        <form onSubmit={newComment}>
+          <div className={Styles.post_form}>
+            <input
+              className={Styles.post_input}
+              type="text"
+              placeholder="Type new comment..."
+              value={comment}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setComment(e.target.value);
+              }}
+            />
+            <button
+              disabled={!comment}
+              className={
+                comment ? Styles.post_button : Styles.post_buttonDisable
+              }
+              type="submit"
+            >
+              <SendIcon className={Styles.post_sendIcon} />
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

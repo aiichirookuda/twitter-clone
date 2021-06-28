@@ -47,19 +47,23 @@ export const Feed: React.FC = () => {
   return (
     <div className={Styles.feed}>
       <TweetInput />
-      {posts.map((post) => {
-        return (
-          <Post
-            key={post.id}
-            postId={post.id}
-            avatar={post.avatar}
-            image={post.image}
-            text={post.text}
-            timestamp={post.timestamp}
-            username={post.username}
-          />
-        );
-      })}
+      {posts[0]?.id && (
+        <>
+          {posts.map((post) => {
+            return (
+              <Post
+                key={post.id}
+                postId={post.id}
+                avatar={post.avatar}
+                image={post.image}
+                text={post.text}
+                timestamp={post.timestamp}
+                username={post.username}
+              />
+            );
+          })}
+        </>
+      )}
     </div>
   );
 };
